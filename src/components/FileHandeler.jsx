@@ -13,6 +13,13 @@ const FileHandler = () => {
   const handleUpload = async (file) => {
     if (!file) return;
 
+    const fileSizeMB = file.size / (1024 * 1024); // Convert bytes to MB
+
+    if (fileSizeMB < 25 || fileSizeMB > 100) {
+      alert("Please upload a video between 25 MB and 100 MB.");
+      return;
+    }
+
     setIsUploading(true);
     setUploadProgress(0);
     setRemainingTime(0);
@@ -33,7 +40,7 @@ const FileHandler = () => {
             const percent = Math.round((loaded * 100) / total);
             setUploadProgress(percent);
 
-            const elapsedTime = (new Date().getTime() - startTimeRef.current) / 1000; 
+            const elapsedTime = (new Date().getTime() - startTimeRef.current) / 1000;
 
             const speed = loaded / elapsedTime;
             const remainingBytes = total - loaded;
