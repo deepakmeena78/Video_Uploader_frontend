@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import "../index.css";
 
@@ -8,45 +8,48 @@ const FileHandler = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
+  const startTimeRef = useRef(null);
+
   const handleUpload = async (file) => {
     if (!file) return;
-
-    const formData = new FormData();
-    formData.append("video", file);
 
     setIsUploading(true);
     setUploadProgress(0);
     setRemainingTime(0);
     setShowPopup(false);
+    startTimeRef.current = new Date().getTime();
 
-    let elapsedTime = 0;
-
-    // Dummy progress interval
-    const interval = setInterval(() => {
-      elapsedTime += 1;
-      setUploadProgress((prev) => {
-        const next = prev < 95 ? prev + 1 : prev;
-        // Estimate remaining time based on dummy progress
-        const remaining = Math.max(Math.round(((100 - next) / next) * elapsedTime), 0);
-        setRemainingTime(remaining);
-        return next;
-      });
-    }, 500); // adjust speed if needed
+    const formData = new FormData();
+    formData.append("video", file);
 
     try {
-      await axios.post("https://video-uploader-server-48c7.onrender.com/api/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await axios.post(
+        "https://video-uploader-server-48c7.onrender.com/api/upload",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: (progressEvent) => {
+            const { loaded, total } = progressEvent;
+            const percent = Math.round((loaded * 100) / total);
+            setUploadProgress(percent);
 
-      clearInterval(interval);
+            const elapsedTime = (new Date().getTime() - startTimeRef.current) / 1000; 
+
+            const speed = loaded / elapsedTime;
+            const remainingBytes = total - loaded;
+            const remaining = Math.max(Math.round(remainingBytes / speed), 0);
+            setRemainingTime(remaining);
+          },
+        }
+      );
+
       setUploadProgress(100);
       setRemainingTime(0);
       setShowPopup(true);
     } catch (error) {
-      clearInterval(interval);
+      console.error("Upload failed", error);
       setUploadProgress(0);
       setRemainingTime(0);
-      console.error("Upload failed", error);
       setShowPopup(true);
     } finally {
       setIsUploading(false);
