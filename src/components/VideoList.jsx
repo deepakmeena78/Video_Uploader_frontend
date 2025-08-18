@@ -10,7 +10,7 @@ function VideoList() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/all");
+        const res = await axios.get("https://video-uploader-server-48c7.onrender.com/api/all");
         setVideos(res.data.videos);
       } catch (err) {
         console.error(err);

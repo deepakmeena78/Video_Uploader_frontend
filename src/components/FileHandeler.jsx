@@ -34,7 +34,7 @@ const FileHandler = () => {
     }, 500); // adjust speed if needed
 
     try {
-      await axios.post("http://localhost:5000/api/upload", formData, {
+      await axios.post("https://video-uploader-server-48c7.onrender.com/api/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
