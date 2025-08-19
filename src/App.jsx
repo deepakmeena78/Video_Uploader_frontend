@@ -3,10 +3,12 @@ import FileUploader from "./components/FileHandeler";
 import VideoList from "./components/VideoList";
 import "./index.css";
 import "./App.css";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <Router>
+      <Toaster/>
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-teal-300 to-blue-200 font-poppins p-4">
         <h1 className="mb-6 text-3xl font-bold text-gray-800 text-center">
           🎥 Video Upload Project
