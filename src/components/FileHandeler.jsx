@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -175,7 +174,9 @@ const FileHandler = () => {
           ref={videoRef}
           autoPlay
           playsInline
-          className="w-64 h-40 bg-black rounded-lg mx-auto mb-3"
+          className={`w-64 h-40 bg-black rounded-lg mx-auto mb-3 ${
+            facingMode === "user" ? "transform -scale-x-100" : ""
+          }`}
         />
         {!recording ? (
           <button
@@ -192,7 +193,6 @@ const FileHandler = () => {
             >
               ⏹ Stop Recording
             </button>
-            {/* Switch Camera Button (only when recording) */}
             <button
               onClick={switchCamera}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600"
