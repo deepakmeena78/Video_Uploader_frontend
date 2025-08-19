@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +14,7 @@ const FileHandler = () => {
   const [fileInfo, setFileInfo] = useState(null);
   const [uploadSpeed, setUploadSpeed] = useState(0);
   const [recording, setRecording] = useState(false);
+  const [facingMode, setFacingMode] = useState("user"); // front/back camera
 
   const startTimeRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -59,8 +61,8 @@ const FileHandler = () => {
             const elapsedTime =
               (new Date().getTime() - startTimeRef.current) / 1000;
 
-            const speed = loaded / elapsedTime; 
-            setUploadSpeed((speed / (1024 * 1024)).toFixed(2)); 
+            const speed = loaded / elapsedTime;
+            setUploadSpeed((speed / (1024 * 1024)).toFixed(2));
 
             const remainingBytes = total - loaded;
             const remaining = Math.max(Math.round(remainingBytes / speed), 0);
@@ -89,7 +91,7 @@ const FileHandler = () => {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: { facingMode: facingMode },
         audio: true,
       });
       videoRef.current.srcObject = stream;
@@ -133,6 +135,16 @@ const FileHandler = () => {
     toast("⏹ Recording stopped", { icon: "✅" });
   };
 
+  // switch camera
+  const switchCamera = () => {
+    setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
+    if (recording) {
+      stopRecording();
+      startRecording();
+    }
+    toast("🔄 Camera switched");
+  };
+
   return (
     <div className="p-6 max-w-xl mx-auto">
       <Toaster position="top-center" reverseOrder={false} />
@@ -149,7 +161,11 @@ const FileHandler = () => {
           accept="video/mp4"
           onChange={(e) => handleUpload(e.target.files[0])}
         />
-        <p className="text-gray-700">📂 Drag & Drop or <span className="font-semibold text-blue-600">Click</span> to upload a video</p>
+        <p className="text-gray-700">
+          📂 Drag & Drop or{" "}
+          <span className="font-semibold text-blue-600">Click</span> to upload a
+          video
+        </p>
         <p className="text-sm text-gray-500">Allowed size: 25MB – 100MB</p>
       </div>
 
@@ -164,25 +180,38 @@ const FileHandler = () => {
         {!recording ? (
           <button
             onClick={startRecording}
-            className="px-5 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600"
+            className="px-5 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 mr-2"
           >
             🎥 Start Recording
           </button>
         ) : (
-          <button
-            onClick={stopRecording}
-            className="px-5 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600"
-          >
-            ⏹ Stop Recording
-          </button>
+          <>
+            <button
+              onClick={stopRecording}
+              className="px-5 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 mr-2"
+            >
+              ⏹ Stop Recording
+            </button>
+            {/* Switch Camera Button (only when recording) */}
+            <button
+              onClick={switchCamera}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600"
+            >
+              🔄 Switch Camera
+            </button>
+          </>
         )}
       </div>
 
       {/* File info */}
       {fileInfo && (
         <div className="mt-5 p-4 border rounded-lg bg-gray-50 text-gray-800 shadow-sm">
-          <p><strong>📂 File Name:</strong> {fileInfo.name}</p>
-          <p><strong>📏 File Size:</strong> {fileInfo.size} MB</p>
+          <p>
+            <strong>📂 File Name:</strong> {fileInfo.name}
+          </p>
+          <p>
+            <strong>📏 File Size:</strong> {fileInfo.size} MB
+          </p>
         </div>
       )}
 
