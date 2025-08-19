@@ -8,21 +8,30 @@ const FileHandler = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
+  const [fileInfo, setFileInfo] = useState(null); 
+  const [uploadSpeed, setUploadSpeed] = useState(0);
+
   const startTimeRef = useRef(null);
 
   const handleUpload = async (file) => {
     if (!file) return;
 
-    const fileSizeMB = file.size / (1024 * 1024); // Convert bytes to MB
+    const fileSizeMB = file.size / (1024 * 1024);
 
     if (fileSizeMB < 25 || fileSizeMB > 100) {
       alert("Please upload a video between 25 MB and 100 MB.");
       return;
     }
 
+    setFileInfo({
+      name: file.name,
+      size: fileSizeMB.toFixed(2),
+    });
+
     setIsUploading(true);
     setUploadProgress(0);
     setRemainingTime(0);
+    setUploadSpeed(0);
     setShowPopup(false);
     startTimeRef.current = new Date().getTime();
 
@@ -40,9 +49,12 @@ const FileHandler = () => {
             const percent = Math.round((loaded * 100) / total);
             setUploadProgress(percent);
 
-            const elapsedTime = (new Date().getTime() - startTimeRef.current) / 1000;
+            const elapsedTime =
+              (new Date().getTime() - startTimeRef.current) / 1000;
 
-            const speed = loaded / elapsedTime;
+            const speed = loaded / elapsedTime; 
+            setUploadSpeed((speed / (1024 * 1024)).toFixed(2)); 
+
             const remainingBytes = total - loaded;
             const remaining = Math.max(Math.round(remainingBytes / speed), 0);
             setRemainingTime(remaining);
@@ -72,6 +84,13 @@ const FileHandler = () => {
         className="mb-4"
       />
 
+      {fileInfo && (
+        <div className="mb-3 p-3 border rounded bg-gray-50 text-gray-800">
+          <p><strong>📂 File Name:</strong> {fileInfo.name}</p>
+          <p><strong>📏 File Size:</strong> {fileInfo.size} MB</p>
+        </div>
+      )}
+
       {isUploading && (
         <div className="mt-4">
           <div className="w-full bg-gray-200 rounded-full h-3">
@@ -81,7 +100,7 @@ const FileHandler = () => {
             ></div>
           </div>
           <p className="text-sm mt-2 text-gray-700">
-            Uploading... {uploadProgress}% | Remaining: {remainingTime}s
+            Uploading... {uploadProgress}% | Speed: {uploadSpeed} MB/s | Remaining: {remainingTime}s
           </p>
         </div>
       )}
