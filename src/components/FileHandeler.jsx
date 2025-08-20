@@ -26,7 +26,7 @@ const FileHandler = () => {
     if (!file) return;
 
     const fileSizeMB = file.size / (1024 * 1024);
-    if (fileSizeMB < 25 || fileSizeMB > 100) {
+    if (fileSizeMB < 1 || fileSizeMB > 100) {
       toast.error("⚠️ Please upload a video between 25 MB and 100 MB.");
       return;
     }
